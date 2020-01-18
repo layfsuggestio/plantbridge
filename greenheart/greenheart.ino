@@ -2,7 +2,7 @@
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-
+#include <Servo.h>
 #include <ESP8266HTTPClient.h>
 
 #include <WiFiClient.h>
@@ -10,10 +10,13 @@
 #define WIFI_OK_LED 0
 #define STATUS_LED 4
 #define RED 13
+#define POURTING_SERVO_GPIO 5
 
 ESP8266WiFiMulti WiFiMulti;
 
-String prefix = "http://104.198.192.55/api/"; ///new_measurement.php?humidity=55&light=0";
+String prefix = "http://104.198.192.55/api/";
+
+Servo pouringServo;
 
 void setup() {
 
@@ -26,6 +29,8 @@ void setup() {
   digitalWrite(STATUS_LED, 0);
   digitalWrite(WIFI_OK_LED, 0);
   digitalWrite(RED, 0);
+
+  pouringServo.attach(POURING_SERVO_GPIO);	 
 
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP("ArchNet", "TUbedefined");
@@ -50,14 +55,13 @@ void loop() {
       int returnCode = http.GET();
 
       if (returnCode == HTTP_CODE_OK) {
-        String message = http.getString();
-        Serial.printf("Setting WIFI_OK_LED LED to %d\n\r", message.toInt());
-        digitalWrite(WIFI_OK_LED, message.toInt());
+        //String message = http.getString();
+        //digitalWrite(WIFI_OK_LED, message.toInt());
+        pouringServo.write(message.toInt());
       }
 
-      Serial.printf("ReturnCode: %d\n\r", returnCode);
     }
-    
+
 
 //    Serial.print("[HTTP] begin...\n\r");
 //    if (http.begin(client, "http://104.198.192.55/api/new_measurement.php?humidity=55&light=0")) {  // HTTP
