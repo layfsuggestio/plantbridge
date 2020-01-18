@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/layfsuggestio/plantbridge#readme",
   "dependencies": {
+    "@chrisoakman/chessboardjs": "^1.0.0",
     "chess.js": "^0.10.2"
   }
 }
