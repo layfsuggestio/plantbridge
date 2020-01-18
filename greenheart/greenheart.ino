@@ -10,7 +10,10 @@
 #define WIFI_OK_LED 0
 #define STATUS_LED 4
 #define RED 13
-#define POURTING_SERVO_GPIO 5
+#define POURING_SERVO_GPIO 5
+
+#define POURING_IDLE_POS 10
+#define POURING_ACTIVE_POS 170
 
 ESP8266WiFiMulti WiFiMulti;
 
@@ -26,11 +29,13 @@ void setup() {
   pinMode(STATUS_LED, OUTPUT);
   pinMode(WIFI_OK_LED, OUTPUT);
   pinMode(RED, OUTPUT);
+  pinMode(POURING_SERVO_GPIO, OUTPUT);
   digitalWrite(STATUS_LED, 0);
   digitalWrite(WIFI_OK_LED, 0);
   digitalWrite(RED, 0);
 
   pouringServo.attach(POURING_SERVO_GPIO);	 
+  pouringServo.write(POURING_IDLE_POS);
 
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP("ArchNet", "TUbedefined");
@@ -55,9 +60,16 @@ void loop() {
       int returnCode = http.GET();
 
       if (returnCode == HTTP_CODE_OK) {
-        //String message = http.getString();
-        //digitalWrite(WIFI_OK_LED, message.toInt());
-        pouringServo.write(message.toInt());
+        String message = http.getString();
+        if (message.toInt()) {
+          digitalWrite(RED, 0);
+          pouringServo.write(POURING_ACTIVE_POS);
+          delay(2000);
+          http.begin(client, prefix + "reset_status.php"); http.GET();
+          pouringServo.write(POURING_IDLE_POS);
+        } else {
+          digitalWrite(RED, 1);
+        }
       }
 
     }
