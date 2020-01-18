@@ -2,7 +2,7 @@
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-
+#include <Servo.h>
 #include <ESP8266HTTPClient.h>
 
 #include <WiFiClient.h>
@@ -10,10 +10,16 @@
 #define WIFI_OK_LED 0
 #define STATUS_LED 4
 #define RED 13
+#define POURING_SERVO_GPIO 5
+
+#define POURING_IDLE_POS 10
+#define POURING_ACTIVE_POS 170
 
 ESP8266WiFiMulti WiFiMulti;
 
-String prefix = "http://104.198.192.55/api/"; ///new_measurement.php?humidity=55&light=0";
+String prefix = "http://104.198.192.55/api/";
+
+Servo pouringServo;
 
 void setup() {
 
@@ -23,9 +29,13 @@ void setup() {
   pinMode(STATUS_LED, OUTPUT);
   pinMode(WIFI_OK_LED, OUTPUT);
   pinMode(RED, OUTPUT);
+  pinMode(POURING_SERVO_GPIO, OUTPUT);
   digitalWrite(STATUS_LED, 0);
   digitalWrite(WIFI_OK_LED, 0);
   digitalWrite(RED, 0);
+
+  pouringServo.attach(POURING_SERVO_GPIO);	 
+  pouringServo.write(POURING_IDLE_POS);
 
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP("ArchNet", "TUbedefined");
@@ -51,13 +61,19 @@ void loop() {
 
       if (returnCode == HTTP_CODE_OK) {
         String message = http.getString();
-        Serial.printf("Setting WIFI_OK_LED LED to %d\n\r", message.toInt());
-        digitalWrite(WIFI_OK_LED, message.toInt());
+        if (message.toInt()) {
+          digitalWrite(RED, 0);
+          pouringServo.write(POURING_ACTIVE_POS);
+          delay(2000);
+          http.begin(client, prefix + "reset_status.php"); http.GET();
+          pouringServo.write(POURING_IDLE_POS);
+        } else {
+          digitalWrite(RED, 1);
+        }
       }
 
-      Serial.printf("ReturnCode: %d\n\r", returnCode);
     }
-    
+
 
 //    Serial.print("[HTTP] begin...\n\r");
 //    if (http.begin(client, "http://104.198.192.55/api/new_measurement.php?humidity=55&light=0")) {  // HTTP
