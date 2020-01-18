@@ -7,10 +7,13 @@
 
 #include <WiFiClient.h>
 
-#define WIFI_OK_LED 0
+#define LIGHT_LED 0
 #define STATUS_LED 4
 #define RED 13
 #define POURING_SERVO_GPIO 5
+#define RELAIS 2
+
+#define DT 3000
 
 #define POURING_IDLE_POS 10
 #define POURING_ACTIVE_POS 170
@@ -21,18 +24,25 @@ String prefix = "http://104.198.192.55/api/";
 
 Servo pouringServo;
 
+#define HUMIDITY 0
+#define LIGHT 1
+unsigned long lasttime;
+int humidity, light;
+
 void setup() {
 
   Serial.begin(115200);
   Serial.setDebugOutput(true);
 
   pinMode(STATUS_LED, OUTPUT);
-  pinMode(WIFI_OK_LED, OUTPUT);
+  pinMode(LIGHT_LED, OUTPUT);
   pinMode(RED, OUTPUT);
   pinMode(POURING_SERVO_GPIO, OUTPUT);
+  pinMode(RELAIS, OUTPUT);
   digitalWrite(STATUS_LED, 0);
-  digitalWrite(WIFI_OK_LED, 0);
+  digitalWrite(LIGHT_LED, 0);
   digitalWrite(RED, 0);
+  lasttime = 0;
 
   pouringServo.attach(POURING_SERVO_GPIO);	 
   pouringServo.write(POURING_IDLE_POS);
@@ -44,6 +54,7 @@ void setup() {
     delay(500);
   }
   digitalWrite(STATUS_LED, 1);
+  digitalWrite(RELAIS, HUMIDITY);
 
 }
 
@@ -72,36 +83,35 @@ void loop() {
         }
       }
 
+      digitalWrite(LIGHT_LED, light >= 400);
+
+      if (millis() - lasttime > DT) {
+        lasttime = millis();
+        read_sensors();
+        String endpoint = prefix + "new_measurement.php?humidity=" + String(humidity) + "&light=" + String(light);
+        Serial.print(endpoint); Serial.print("\n\r");
+        http.begin(client, endpoint); http.GET();
+      }
+
     }
 
-
-//    Serial.print("[HTTP] begin...\n\r");
-//    if (http.begin(client, "http://104.198.192.55/api/new_measurement.php?humidity=55&light=0")) {  // HTTP
-//
-//
-//      Serial.print("[HTTP] GET...\n");
-//      // start connection and send HTTP header
-//      int httpCode = http.GET();
-//
-//      // httpCode will be negative on error
-//      if (httpCode > 0) {
-//        // HTTP header has been send and Server response header has been handled
-//        Serial.printf("[HTTP] GET... code: %d\n", httpCode);
-//
-//        // file found at server
-//        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-//          String payload = http.getString();
-//          Serial.println(payload);
-//        }
-//      } else {
-//        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-//      }
-//
-//      http.end();
-//    } else {
-//      Serial.printf("[HTTP} Unable to connect\n");
-//    }
   }
 
   //delay(1000);
+}
+
+void read_sensors() {
+  if (digitalRead(RELAIS) == HUMIDITY) {
+    humidity = analogRead(A0);
+    digitalWrite(RELAIS, LIGHT);
+    delay(200);
+    light = analogRead(A0);
+  } else {
+    light = analogRead(A0);
+    digitalWrite(RELAIS, HUMIDITY);
+    delay(200);
+    humidity = analogRead(A0);
+  }
+
+
 }
