@@ -1,3 +1,7 @@
-=== Plantbridge
+= Plantbridge
 
 Hackcambridge101 project
+
+== Subfolders
+
+* _greenheart_: Arduino Code for the plant's heart
