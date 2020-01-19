@@ -1,28 +1,20 @@
-from flask import Flask
-from flask_socketio import SocketIO, emit
+import flask
+from flask import Flask, request, jsonify, after_this_request
 
 app = Flask(__name__)
-app.config['SECRET KEY'] = 'very_secret'
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+@app.route('/hello', methods=['GET'])
+def hello():
+    @after_this_request
+    def add_header(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
-position = {
-	"o": "start"
-}
+    jsonResp = {'fen': "6N1/P3R3/3B1p1P/2P3P1/p3K2k/1q6/B1P5/2N2n2"}
+    print(jsonResp)
+    return jsonify(jsonResp)
 
-@socketio.on('connection')
-def client_connection():
-    print("Client connected")
-    # emit('position', position)
-
-@socketio.on('disconnect')
-def client_disconnect():
-    print("Client disconnected")
-
-@socketio.on("position")
-def position(data):    
-    emit('position', position, broadcast=True	)
 
 if __name__ == '__main__':
-    app.debug = True
-    socketio.run(app, port=5000)
+	app.debug=True
+	app.run(port=5000)
