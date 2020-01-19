@@ -34,6 +34,8 @@ class Stockfish extends Component {
   };
 
   engineGame = options => {
+    console.log("engineGame options: " , options);
+
     options = options || {};
 
     /// We can load Stockfish via Web Workers or via STOCKFISH() if loaded from a <script> tag.
@@ -65,7 +67,7 @@ class Stockfish extends Component {
     }, 500);
 
     function uciCmd(cmd, which) {
-      // console.log('UCI: ' + cmd);
+      console.log('UCI: ' + cmd);
 
       (which || engine).postMessage(cmd);
     }
@@ -186,7 +188,7 @@ class Stockfish extends Component {
       } else {
         line = event;
       }
-      // console.log('Reply: ' + line);
+      console.log('Reply: ' + line);
       if (line === "uciok") {
         engineStatus.engineLoaded = true;
       } else if (line === "readyok") {
