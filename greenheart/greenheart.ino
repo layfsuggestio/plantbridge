@@ -1,17 +1,5 @@
 #include <Arduino.h>
 
-/**
- * On sparkfun ESP8266
- * 
- * Pinout:
- * 
- * 02: SDA (I2C to Display)
- * 14: SCL (I2C to Display)
- * 
- * 
- * 
- * **/
-
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <Servo.h>
@@ -58,6 +46,7 @@ void setup() {
   lasttime = 0;
 
   setup_lcd();
+  lcd.print("Plantbridge");
 
   pouringServo.attach(POURING_SERVO_GPIO);	 
   pouringServo.write(POURING_IDLE_POS);
@@ -70,6 +59,8 @@ void setup() {
   }
   
   digitalWrite(STATUS_LED, 1);
+  delay(2000);
+  lcd.clear();
 }
 
 void loop() {
@@ -92,6 +83,11 @@ void loop() {
         else lcd.noBacklight();
 
         char resultOfTurn = message[2];
+        if (resultOfTurn == '0') {
+          e = 1;
+        } else {
+          e = 0;
+        }
       }
 
       digitalWrite(LIGHT_LED, light >= 400);
@@ -104,15 +100,29 @@ void loop() {
         http.begin(client, endpoint); http.GET();
       }
     }
+  } else {
+    lcd.clear(); 
+    lcd.home();
+    lcd.print("No WIFI");
+    delay(2000);
+    lcd.clear();
   }
 }
 
 void handle_reward() {
+  lcd.clear();
+  lcd.home();
+  lcd.print("YEAH!");
+  lcd.setCursor(0, 1);
+  lcd.print("WooHoo!");
+  
   pouringServo.write(POURING_ACTIVE_POS);
   delay(2000);
   http.begin(client, prefix + "reset_status.php"); http.GET();
   pouringServo.write(POURING_IDLE_POS);
   e = 1;
+  lcd.clear();
+  lcd.home();
 }
 
 void read_sensors() {
@@ -251,7 +261,6 @@ byte customChar7[] = {
 void setup_lcd() {
   lcd.init();
   lcd.backlight();
-
   lcd.createChar(0, customChar0);
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
@@ -261,7 +270,6 @@ void setup_lcd() {
   lcd.createChar(6, customChar6);
   lcd.createChar(7, customChar7);
   lcd.home();
-  look_right(e);
 }
 
 void look_right(int evil) {
@@ -276,7 +284,7 @@ void look_left(int evil) {
 
 void draw_eye(int start_idx, int lr, int evil) {
   lcd.setCursor(start_idx, 0);
-  if (evil) {
+  if (!evil) {
     lcd.write(6);
     lcd.write(7);
   } else {
