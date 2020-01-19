@@ -1,25 +1,47 @@
 import React, { Component } from "react";
 import Chessboard from "chessboardjsx";
-const io = require('socket.io-client/dist/socket.io');
-// const socket = io("http://0.0.0.0:5000", {
-//   transports: ['websocket']
-// });
-const socket = io("http://0.0.0.0:5000");
+// const io = require('socket.io-client/dist/socket.io');
+// // const socket = io("http://0.0.0.0:5000", {
+// //   transports: ['websocket']
+// // });
+// const socket = io("http://0.0.0.0:5000");
 
 class Demo extends Component {
 
   state = {
-    position: "3B4/2b2pn1/P3p3/7p/1P1k3P/R4K1b/3P2r1/1N6"
+    position: "start"
   };
 
   componentDidMount() {
     // Called when the board loads first
     console.log("DID MOUNT");
-    socket.on("connection", () => console.log("al"));
-    socket.on("o", pos => console.log(pos));//this.haveNewPosition(pos));
+    // socket.on("connection", () => console.log("al"));
+    // socket.on("o", pos => console.log(pos));//this.haveNewPosition(pos));
+  }
+
+  componentWillMount() {
+    this.getData()
+  }
+
+  getData() {
+    // create a new XMLHttpRequest
+    var xhr = new XMLHttpRequest()
+
+    // get a callback when the server responds
+    xhr.addEventListener('load', () => {
+      // update the state of the component with the result here
+      console.log(xhr.responseText)
+      console.log(JSON.parse(xhr.responseText).fen)
+      this.haveNewPosition(JSON.parse(xhr.responseText))
+    })
+    // open the request with the verb and the url
+    xhr.open('GET', 'http://localhost:5000/hello')
+    // send the request
+    xhr.send()
   }
 
   render() {
+    console.log(this.state)
     const { position } = this.state;
     return (
       <div style={boardsContainer}>
