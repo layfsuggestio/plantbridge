@@ -2,4 +2,6 @@
 
 A Game of Chess between the Stock Market and a Basil Plant. Our basil controls one agent of a chess game against capitalistic exploitation by influencing the solver's heuristic using IoT technology.
 
+Find on Devpost: https://devpost.com/software/jeff-basil-against-the-world
+
 image::doc/logo.png[Logo]
