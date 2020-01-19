@@ -1,10 +1,11 @@
 import flask
 from flask import Flask, request, jsonify, after_this_request
 import requests
+import time
 import chess
 from pystockfish import *
 
-BOARDFEN = "state"
+BOARDFEN = "start"
 
 app = Flask(__name__)
 
@@ -56,7 +57,7 @@ def new_game():
         if not m.move():
             # game ended
             gameover = True
-        
+
         # generate fen, prepare for GUI: sensors & game state
         board.push(chess.Move.from_uci(m.moves[-1]))
         fen = board.fen()
@@ -65,6 +66,8 @@ def new_game():
         
         # request: to endpoint: game state   TODO suffix
         requests.get("http://104.198.192.55/api/set_state.php?player=1&lost=1")
+
+        time.sleep(2)
 
         # IF newgame: break
         if 1 == int(requests.get("http://104.198.192.55/api/request_game.php").content):
