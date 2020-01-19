@@ -5,9 +5,7 @@
 #include <Servo.h>
 #include <ESP8266HTTPClient.h>
 #include <Wire.h>
-
 #include <LiquidCrystal_I2C.h>
-
 #include <WiFiClient.h>
 
 #define LIGHT_LED 0
@@ -18,7 +16,7 @@
 
 #define DT 3000
 
-#define POURING_IDLE_POS 10
+#define POURING_IDLE_POS 1
 #define POURING_ACTIVE_POS 90
 
 ESP8266WiFiMulti WiFiMulti;
