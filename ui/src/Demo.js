@@ -25,23 +25,23 @@ class Demo extends Component {
 
   getData() {
     // create a new XMLHttpRequest
-    var xhr = new XMLHttpRequest()
+    var xhr = new XMLHttpRequest();
 
     // get a callback when the server responds
     xhr.addEventListener('load', () => {
       // update the state of the component with the result here
-      console.log(xhr.responseText)
-      console.log(JSON.parse(xhr.responseText).fen)
-      this.haveNewPosition(JSON.parse(xhr.responseText))
-    })
+      // console.log(xhr.responseText);
+      // console.log(JSON.parse(xhr.responseText).fen);
+      this.haveNewPosition(JSON.parse(xhr.responseText));
+    });
     // open the request with the verb and the url
-    xhr.open('GET', 'http://localhost:5000/hello')
+    xhr.open('GET', 'http://localhost:5000/position');
     // send the request
     xhr.send()
   }
 
   render() {
-    console.log(this.state)
+    setTimeout(this.getData.bind(this), 3000);
     const { position } = this.state;
     return (
       <div style={boardsContainer}>
@@ -58,7 +58,7 @@ class Demo extends Component {
   }
 
   haveNewPosition(position) {
-    console.log(position);
+    // console.log(position);
     this.setState({ position: position.fen });
   }
 }
