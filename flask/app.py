@@ -62,6 +62,9 @@ def new_game():
         if not m.move():
             # game ended
             GAMEOVER = True
+            if m.winner == m.black_engine:
+            	# if plant won
+            	requests.get("http://104.198.192.55/api/plant_wins.php")
 
         # generate fen, prepare for GUI: sensors & game state
         board.push(chess.Move.from_uci(m.moves[-1]))
