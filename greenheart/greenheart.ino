@@ -92,6 +92,11 @@ void loop() {
         else lcd.noBacklight();
 
         char resultOfTurn = message[2];
+        if (resultOfTurn == '0') {
+          e = 1;
+        } else {
+          e = 0;
+        }
       }
 
       digitalWrite(LIGHT_LED, light >= 400);
@@ -251,7 +256,6 @@ byte customChar7[] = {
 void setup_lcd() {
   lcd.init();
   lcd.backlight();
-
   lcd.createChar(0, customChar0);
   lcd.createChar(1, customChar1);
   lcd.createChar(2, customChar2);
