@@ -19,13 +19,8 @@ $li = $row["light"];
 $st = $row["stock"];
 $tm = $row["temp"];
 
-$stocknorm = 29348.1;
-$stockhalf = 0.6;
-$st = $st/$stocknorm;
-$st = $st-$stockhalf;
-$d = ($hu + 1024 - $li - abs($tm-800))/3/1024;
 
-echo($d . "\r\n" .  $st);
+echo($hu  . "\r\n" . $li . "\r\n" . $st  . "\r\n" . $tm);
 
 $conn->close();
 ?>
