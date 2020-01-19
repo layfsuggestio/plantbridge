@@ -44,14 +44,19 @@ void setup() {
   lasttime = 0;
 
   setup_lcd();
-  lcd.print("Plantbridge");
+  //lcd.print("Plantbridge");
+
+  look_left(1); //HACK
 
   pouringServo.attach(POURING_SERVO_GPIO);	 
   pouringServo.write(POURING_IDLE_POS);
 
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP("ArchNet", "TUbedefined");
+  //WiFiMulti.addAP("HackCambridge101", "");
+  //WiFiMulti.addAP("TEST1", "Test1234");
 
+  /*
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
   }
@@ -59,10 +64,13 @@ void setup() {
   digitalWrite(STATUS_LED, 1);
   delay(2000);
   lcd.clear();
+
+  */
 }
 
 void loop() {
   // Set WifiStatus to STATUS_LED LED
+  /*
   digitalWrite(STATUS_LED, WiFi.status() == WL_CONNECTED);
   
   if ((WiFiMulti.run() == WL_CONNECTED)) {
@@ -105,6 +113,12 @@ void loop() {
     delay(2000);
     lcd.clear();
   }
+  */
+
+  look_left(1);
+  delay(5000);
+  look_right(1);
+  delay(5000);
 }
 
 void handle_reward() {

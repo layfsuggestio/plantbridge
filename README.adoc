@@ -1,7 +1,5 @@
 = Plantbridge
 
-Hackcambridge101 project
+A Game of Chess between the Stock Market and a Basil Plant. Our basil controls one agent of a chess game against capitalistic exploitation by influencing the solver's heuristic using IoT technology.
 
-== Subfolders
-
-* _greenheart_: Arduino Code for the plant's heart
+image::doc/logo.png[Logo]
