@@ -55,8 +55,8 @@ def new_game():
         plant_skill, stock_skill = requests.get("http://104.198.192.55/api/request_difficulty.php").content.split(b'\r')
         plant_skill, stock_skill = float(plant_skill), float(stock_skill)
         # update skill level
-        m.white_engine.setoption("Skill Level", 20 * plant_skill)
-        m.black_engine.setoption("Skill Level", 20 * stock_skill)
+        m.white_engine.setoption("Skill Level", 20 * stock_skill)
+        m.black_engine.setoption("Skill Level", 20 * plant_skill)
         
         # make a move
         if not m.move():
@@ -70,7 +70,7 @@ def new_game():
         BOARDFEN = fen
         
         # request: to endpoint: game state   TODO suffix
-        requests.get("http://104.198.192.55/api/set_state.php?player=1&lost=1")
+        requests.get("http://104.198.192.55/api/set_state.php?player=%d&lost=1" % (len(m.moves) % 2))
 
         time.sleep(2)
 
