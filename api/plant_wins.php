@@ -12,21 +12,12 @@ if ($conn->connect_error) {
 }
 
 
-//$sql = "UPDATE `requested_status` SET `value` = '1' WHERE `requested_status`.`id` = 1;";
-
-//if ($conn->query($sql) === TRUE) {
-//} else {
-//    echo "Error: " . $sql . "<br>" . $conn->error;
-//}
-
-
-$sql = "UPDATE `requested_restart` SET `resetgame` = '1' WHERE `requested_restart`.`id` = 1;";
+$sql = "UPDATE `requested_status` SET `value` = '1' WHERE `requested_status`.`id` = 1;";
 
 if ($conn->query($sql) === TRUE) {
 } else {
     echo "Error: " . $sql . "<br>" . $conn->error;
 }
-
 
 $conn->close();
 ?>
