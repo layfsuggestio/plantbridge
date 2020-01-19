@@ -12,7 +12,6 @@
 
 #define LIGHT_LED 0
 #define STATUS_LED 4
-#define RED 13
 #define POURING_SERVO_GPIO 5
 #define RELAIS 15
 #define RELAIS_2 16
@@ -39,20 +38,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 void setup() {
 
   Serial.begin(115200);
-
-  pinMode(STATUS_LED, OUTPUT);
-  pinMode(LIGHT_LED, OUTPUT);
-  pinMode(RED, OUTPUT);
-  pinMode(POURING_SERVO_GPIO, OUTPUT);
-  pinMode(RELAIS, OUTPUT);
-  pinMode(RELAIS_2, OUTPUT);
-  pinMode(SCL, INPUT_PULLUP);
-  pinMode(SDA, INPUT_PULLUP);
-  digitalWrite(STATUS_LED, 0);
-  digitalWrite(LIGHT_LED, 0);
-  digitalWrite(RED, 0);
-  digitalWrite(RELAIS, 0);
-  digitalWrite(RELAIS_2, 0);
+  setup_io();
   lasttime = 0;
 
   lcd.init();
@@ -68,9 +54,8 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
   }
+  
   digitalWrite(STATUS_LED, 1);
-  digitalWrite(RELAIS, HUMIDITY);
-
 }
 
 void loop() {
@@ -88,13 +73,10 @@ void loop() {
       if (returnCode == HTTP_CODE_OK) {
         String message = http.getString();
         if (message.toInt()) {
-          digitalWrite(RED, 0);
           pouringServo.write(POURING_ACTIVE_POS);
           delay(2000);
           http.begin(client, prefix + "reset_status.php"); http.GET();
           pouringServo.write(POURING_IDLE_POS);
-        } else {
-          digitalWrite(RED, 1);
         }
       }
 
@@ -114,20 +96,21 @@ void loop() {
 void read_sensors() {
   if (digitalRead(RELAIS) == HUMIDITY) {
     humidity = analogRead(A0);
+    set_analog_input(TEMPERATURE);
+    delay(200);
+    temp = analogRead(A0);
+    delay(200);
     set_analog_input(LIGHT);
-    delay(400);
+    delay(200);
+    light = analogRead(A0);
+  } else {
     light = analogRead(A0);
     set_analog_input(TEMPERATURE);
-    delay(400);
+    delay(200);
     temp = analogRead(A0);
-    
-  } else {
-    temp = analogRead(A0);
-    set_analog_input(LIGHT);
-    delay(400);
-    light = analogRead(A0);
+    delay(200);
     set_analog_input(HUMIDITY);
-    delay(400);
+    delay(200);
     humidity = analogRead(A0);
   }
 }
@@ -135,4 +118,19 @@ void read_sensors() {
 int set_analog_input(int chan) {
   digitalWrite(RELAIS, chan & 0b01);
   digitalWrite(RELAIS_2, chan & 0b10);
+}
+
+void setup_io() {
+  pinMode(STATUS_LED, OUTPUT);
+  pinMode(LIGHT_LED, OUTPUT);
+  pinMode(POURING_SERVO_GPIO, OUTPUT);
+  pinMode(RELAIS, OUTPUT);
+  pinMode(RELAIS_2, OUTPUT);
+  pinMode(SCL, INPUT_PULLUP);
+  pinMode(SDA, INPUT_PULLUP);
+  digitalWrite(STATUS_LED, 0);
+  digitalWrite(LIGHT_LED, 0);
+  digitalWrite(RELAIS, 0);
+  digitalWrite(RELAIS_2, 0);
+  digitalWrite(RELAIS, 0);
 }
