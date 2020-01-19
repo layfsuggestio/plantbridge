@@ -1,36 +1,41 @@
-<?php 
-   function display() {
-      	$servername = "localhost";
-	$username = "root";
-	$password = "abcd1234";
-	$dbname = "plant_measurements";
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "abcd1234";
+$dbname = "plant_measurements";
 
-	// Create connection
-	$conn = new mysqli($servername, $username, $password, $dbname);
-	// Check connection
-	if ($conn->connect_error) {
-	    die("Connection failed: " . $conn->connect_error);
-	}
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
-	$test = $_POST["studentname"];
-	$sql = "UPDATE `requested_status` SET `value` = '$test' WHERE `requested_status`.`id` = 1;";
+$player =  $_GET['player'];
+$looser =  $_GET['lost'];
+$entry = 1;
 
-	if ($conn->query($sql) === TRUE) {
-	} else {
-	    echo "Error: " . $sql . "<br>" . $conn->error;
-	}
+if ($player == 0){
+    if ($looser == 1){
+	$entry = 2;
+    }
+}
+if ($player == 1){
+    if ($looser == 1){
+	$entry = 0;
+    }
+}
 
-	$conn->close();
-   }
+
+
+
+$sql = "UPDATE `game_state` SET `lastplay` = '$player', `takenfigure` = '$entry' WHERE `game_state`.`id` = 1;";
+
+if ($conn->query($sql) === TRUE) {
+    echo "Record updated successfully";
+} else {
+    echo "Error: " . $sql . "<br>" . $conn->error;
+}
+
+$conn->close();
 ?>
-<html>
-    <body>
-        <form method="post">
-            <input type="text" name="studentname">
-            <input type="submit" value="click">
-        </form>
-        <?php
-           display();
-        ?>
-    </body>
-</html>

@@ -3,7 +3,7 @@
 $connect = mysqli_connect("localhost", "root", "abcd1234", "plant_measurements");
 $query = '
 SELECT light, 
-id AS datetime 
+timestamp AS datetime 
 FROM sensor_data
 ';
 $result = mysqli_query($connect, $query);
@@ -24,9 +24,9 @@ $table['cols'] = array(
 while($row = mysqli_fetch_array($result))
 {
  $sub_array = array();
- $datetime = explode(".", $row["datetime"]);
+ $datetime = explode(".", date_format(new DateTime($row['datetime']), 'H'));
  $sub_array[] =  array(
-      "v" => 'Date(' . $datetime[0] . '000)'
+      "v" => 'Date(' . $datetime[0] . ')'
      );
  $sub_array[] =  array(
       "v" => $row["light"]
@@ -74,7 +74,7 @@ $jsonTable = json_encode($table);
  <body>
   <div class="page-wrapper">
    <br />
-   <h2 align="center">Display Google Line Chart with JSON PHP & Mysql</h2>
+   <h2 align="center">Chess Plant Dashboard</h2>
    <div id="line_chart" style="width: 100%; height: 500px"></div>
   </div>
  </body>
