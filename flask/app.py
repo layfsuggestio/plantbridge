@@ -6,6 +6,7 @@ import chess
 from pystockfish import *
 
 BOARDFEN = "start"
+GAMEOVER = True
 
 app = Flask(__name__)
 
@@ -27,36 +28,43 @@ def new_game():
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-
+        
+    global GAMEOVER
+    if not GAMEOVER:
+        return
+    
     def _create_match():
-	    engines = {
-	        # TODO depth 2 only for debugging
-	        'player1': Engine(depth=2, rand=False),
-	        'player2': Engine(depth=2, rand=False)
-	    }
-	    m = Match(engines=engines)
-	    return m
-	
-	# request: to endpoint: game start
+        engines = {
+            # TODO depth 2 only for debugging
+            'player1': Engine(depth=2, rand=False),
+            'player2': Engine(depth=2, rand=False)
+        }
+        m = Match(engines=engines)
+        return m
+    
+    # request: to endpoint: game start
     requests.get("http://104.198.192.55/api/reset_game.php")
     m = _create_match()
     board = chess.Board()
-    gameover = False
+    GAMEOVER = False
     global BOARDFEN
 
     # TODO update GUI: game starts
-    while not gameover:
+    while not GAMEOVER:
         # request: from endpoint: skill levels for both players
         plant_skill, stock_skill = requests.get("http://104.198.192.55/api/request_difficulty.php").content.split(b'\r')
         plant_skill, stock_skill = float(plant_skill), float(stock_skill)
         # update skill level
-        m.white_engine.setoption("Skill Level", 20 * plant_skill)
-        m.black_engine.setoption("Skill Level", 20 * stock_skill)
+        m.white_engine.setoption("Skill Level", 20 * stock_skill)
+        m.black_engine.setoption("Skill Level", 20 * plant_skill)
         
         # make a move
         if not m.move():
             # game ended
-            gameover = True
+            GAMEOVER = True
+            if m.winner == m.black_engine:
+            	# if plant won
+            	requests.get("http://104.198.192.55/api/plant_wins.php")
 
         # generate fen, prepare for GUI: sensors & game state
         board.push(chess.Move.from_uci(m.moves[-1]))
@@ -65,15 +73,20 @@ def new_game():
         BOARDFEN = fen
         
         # request: to endpoint: game state   TODO suffix
-        requests.get("http://104.198.192.55/api/set_state.php?player=1&lost=1")
+        requests.get("http://104.198.192.55/api/set_state.php?player=%d&lost=1" % (len(m.moves) % 2))
 
         time.sleep(2)
 
         # IF newgame: break
         if 1 == int(requests.get("http://104.198.192.55/api/request_game.php").content):
             break
-    return
+    
+    GAMEOVER=True
+
+
+    jsonResp = {}
+    return jsonify(jsonResp)
 
 if __name__ == '__main__':
-	app.debug=True
-	app.run(port=5000, threaded=True)
+    app.debug=True
+    app.run(port=5000, threaded=True)
