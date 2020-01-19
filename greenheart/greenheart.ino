@@ -4,6 +4,9 @@
 #include <ESP8266WiFiMulti.h>
 #include <Servo.h>
 #include <ESP8266HTTPClient.h>
+#include <Wire.h>
+
+#include <LiquidCrystal_I2C.h>
 
 #include <WiFiClient.h>
 
@@ -11,7 +14,8 @@
 #define STATUS_LED 4
 #define RED 13
 #define POURING_SERVO_GPIO 5
-#define RELAIS 2
+#define RELAIS 15
+#define RELAIS_2 16
 
 #define DT 3000
 
@@ -24,25 +28,36 @@ String prefix = "http://104.198.192.55/api/";
 
 Servo pouringServo;
 
-#define HUMIDITY 0
-#define LIGHT 1
+#define HUMIDITY 0b00
+#define LIGHT 0b11
+#define TEMPERATURE 0b01
 unsigned long lasttime;
-int humidity, light;
+int humidity, light, temp;
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 void setup() {
 
   Serial.begin(115200);
-  Serial.setDebugOutput(true);
 
   pinMode(STATUS_LED, OUTPUT);
   pinMode(LIGHT_LED, OUTPUT);
   pinMode(RED, OUTPUT);
   pinMode(POURING_SERVO_GPIO, OUTPUT);
   pinMode(RELAIS, OUTPUT);
+  pinMode(RELAIS_2, OUTPUT);
+  pinMode(SCL, INPUT_PULLUP);
+  pinMode(SDA, INPUT_PULLUP);
   digitalWrite(STATUS_LED, 0);
   digitalWrite(LIGHT_LED, 0);
   digitalWrite(RED, 0);
+  digitalWrite(RELAIS, 0);
+  digitalWrite(RELAIS_2, 0);
   lasttime = 0;
+
+  lcd.init();
+  lcd.print("Basilikum.");
+  lcd.backlight();
 
   pouringServo.attach(POURING_SERVO_GPIO);	 
   pouringServo.write(POURING_IDLE_POS);
@@ -88,30 +103,36 @@ void loop() {
       if (millis() - lasttime > DT) {
         lasttime = millis();
         read_sensors();
-        String endpoint = prefix + "new_measurement.php?humidity=" + String(humidity) + "&light=" + String(light);
+        String endpoint = prefix + "new_measurement.php?humidity=" + String(humidity) + "&light=" + String(light) + "&temp=" + String(temp);
         Serial.print(endpoint); Serial.print("\n\r");
         http.begin(client, endpoint); http.GET();
       }
-
     }
-
   }
-
-  //delay(1000);
 }
 
 void read_sensors() {
   if (digitalRead(RELAIS) == HUMIDITY) {
     humidity = analogRead(A0);
-    digitalWrite(RELAIS, LIGHT);
-    delay(200);
+    set_analog_input(LIGHT);
+    delay(400);
     light = analogRead(A0);
+    set_analog_input(TEMPERATURE);
+    delay(400);
+    temp = analogRead(A0);
+    
   } else {
+    temp = analogRead(A0);
+    set_analog_input(LIGHT);
+    delay(400);
     light = analogRead(A0);
-    digitalWrite(RELAIS, HUMIDITY);
-    delay(200);
+    set_analog_input(HUMIDITY);
+    delay(400);
     humidity = analogRead(A0);
   }
+}
 
-
+int set_analog_input(int chan) {
+  digitalWrite(RELAIS, chan & 0b01);
+  digitalWrite(RELAIS_2, chan & 0b10);
 }
