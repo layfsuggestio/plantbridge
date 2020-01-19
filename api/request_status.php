@@ -11,18 +11,18 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$sql = "SELECT lastplay, takenfigure FROM game_state";
+$result = $conn->query($sql);
+$row = mysqli_fetch_assoc($result);
+$lp = $row["lastplay"];
+$tf = $row["takenfigure"];
+
 $sql = "SELECT value FROM requested_status";
 $result = $conn->query($sql);
+$row = mysqli_fetch_assoc($result);
+$v1 = $row["value"];
 
-
-if (mysqli_num_rows($result) > 0) {
-    // output data of each row
-    while($row = mysqli_fetch_assoc($result)) {
-	echo($row["value"]);
-    }
-} else {
-    echo "0 results";
-}
+echo($v1 . $lp . $tf);
 
 $conn->close();
 ?>
