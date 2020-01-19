@@ -6,6 +6,7 @@ import chess
 from pystockfish import *
 
 BOARDFEN = "start"
+GAMEOVER = True
 
 app = Flask(__name__)
 
@@ -27,25 +28,29 @@ def new_game():
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-
+        
+    global GAMEOVER
+    if not GAMEOVER:
+        return
+    
     def _create_match():
-	    engines = {
-	        # TODO depth 2 only for debugging
-	        'player1': Engine(depth=2, rand=False),
-	        'player2': Engine(depth=2, rand=False)
-	    }
-	    m = Match(engines=engines)
-	    return m
-	
-	# request: to endpoint: game start
+        engines = {
+            # TODO depth 2 only for debugging
+            'player1': Engine(depth=2, rand=False),
+            'player2': Engine(depth=2, rand=False)
+        }
+        m = Match(engines=engines)
+        return m
+    
+    # request: to endpoint: game start
     requests.get("http://104.198.192.55/api/reset_game.php")
     m = _create_match()
     board = chess.Board()
-    gameover = False
+    GAMEOVER = False
     global BOARDFEN
 
     # TODO update GUI: game starts
-    while not gameover:
+    while not GAMEOVER:
         # request: from endpoint: skill levels for both players
         plant_skill, stock_skill = requests.get("http://104.198.192.55/api/request_difficulty.php").content.split(b'\r')
         plant_skill, stock_skill = float(plant_skill), float(stock_skill)
@@ -56,7 +61,7 @@ def new_game():
         # make a move
         if not m.move():
             # game ended
-            gameover = True
+            GAMEOVER = True
 
         # generate fen, prepare for GUI: sensors & game state
         board.push(chess.Move.from_uci(m.moves[-1]))
@@ -72,8 +77,13 @@ def new_game():
         # IF newgame: break
         if 1 == int(requests.get("http://104.198.192.55/api/request_game.php").content):
             break
-    return
+    
+    GAMEOVER=True
+
+
+    jsonResp = {}
+    return jsonify(jsonResp)
 
 if __name__ == '__main__':
-	app.debug=True
-	app.run(port=5000, threaded=True)
+    app.debug=True
+    app.run(port=5000, threaded=True)

@@ -43,9 +43,10 @@ class Demo extends Component {
     }
 
     render() {
-        setTimeout(this.getData.bind(this), 3000);
+        setTimeout(this.getData.bind(this), 1000);
         const {position} = this.state;
         return (
+            <div>
             <div style={boardsContainer}>
                 <Chessboard
                     id="board1"
@@ -179,6 +180,19 @@ class Demo extends Component {
                     }}
                 />
             </div>
+                <button style={buttonStyle} onClick={()=>{
+                    // create a new XMLHttpRequest
+                    var xhr = new XMLHttpRequest();
+                    // // get a callback when the server responds
+                    xhr.addEventListener('load', () => {
+                        console.log(JSON.parse(xhr.responseText));
+                    });
+                    // open the request with the verb and the url
+                    xhr.open('GET', 'http://localhost:5000/new_game');
+                    // send the request
+                    xhr.send()
+                }}>Start Game</button>
+        </div>
         );
     }
 
@@ -189,6 +203,10 @@ class Demo extends Component {
 }
 
 export default Demo;
+
+const buttonStyle = {
+    alignItems: "center",
+};
 
 const boardsContainer = {
     display: "flex",
