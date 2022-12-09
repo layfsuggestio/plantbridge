@@ -7,7 +7,7 @@
     "bootstrap": "^4.4.1",
     "chess.js": "0.10.2",
     "chessboardjsx": "2.0.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "react": "^16.4.0",
     "react-bootstrap": "^1.0.0-beta.16",
     "react-dom": "^16.12.0",
